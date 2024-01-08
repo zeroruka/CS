@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+        background-color: #222;
+        font-family: Arial, sans-serif;
+      }
+
+      canvas {
+        display: block;
+        margin: 20px;
+        background-color: black;
+      }
+
+      .controls {
+        display: flex;
+        align-items: center;
+      }
+
+      button {
+        background-color: #4caf50;
+        border: none;
+        color: white;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+        padding: 10px 24px;
+        border-radius: 5px;
+      }
+
+      input[type="range"] {
+        width: 200px;
+        margin-left: 20px;
+      }
+    </style>
+    <title>Pong Game</title>
+  </head>
+  <body>
+    <canvas id="pong" width="800" height="600"></canvas>
+    <div class="controls">
+      <button id="startStopBtn">Start</button>
+      <input type="range" id="speedSlider" min="1" max="10" value="4" />
+    </div>
+    <script>
+      const canvas = document.getElementById("pong");
+      const ctx = canvas.getContext("2d");
+      const startStopBtn = document.getElementById("startStopBtn");
+      const speedSlider = document.getElementById("speedSlider");
+
+      const paddleWidth = 10;
+      const paddleHeight = 100;
+      const ballRadius = 8;
+
+      let leftPaddle = {
+        x: 20,
+        y: canvas.height / 2 - paddleHeight / 2,
+        dy: 0,
+      };
+
+      let rightPaddle = {
+        x: canvas.width - 20 - paddleWidth,
+        y: canvas.height / 2 - paddleHeight / 2,
+        dy: 0,
+      };
+
+      let ball = {
+        x: canvas.width / 2,
+        y: canvas.height / 2,
+        dx: 4,
+        dy: 4,
+      };
+
+      let isPlaying = false;
+      let animationFrameId;
+
+      function drawPaddle(x, y) {
+        ctx.fillStyle = "white";
+        ctx.fillRect(x, y, paddleWidth, paddleHeight);
+      }
+
+      function drawBall() {
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, ballRadius, 0, Math.PI * 2);
+        ctx.fillStyle = "white";
+        ctx.fill();
+        ctx.closePath();
+      }
+
+      function update() {
+        leftPaddle.y += leftPaddle.dy;
+        rightPaddle.y += rightPaddle.dy;
+        ball.x += ball.dx;
+        ball.y += ball.dy;
+
+        if (ball.y - ballRadius <= 0 || ball.y + ballRadius >= canvas.height) {
+          ball.dy *= -1;
+        }
+
+        if (
+          (ball.x - ballRadius <= leftPaddle.x + paddleWidth &&
+            ball.y >= leftPaddle.y &&
+            ball.y <= leftPaddle.y + paddleHeight) ||
+          (ball.x + ballRadius >= rightPaddle.x &&
+            ball.y >= rightPaddle.y &&
+            ball.y <= rightPaddle.y + paddleHeight)
+        ) {
+          ball.dx *= -1;
+        }
+
+        if (ball.x < 0 || ball.x > canvas.width) {
+          ball.x = canvas.width / 2;
+          ball.y = canvas.height / 2;
+          ball.dx *= -1;
+        }
+
+        if (leftPaddle.y < 0) {
+          leftPaddle.y = 0;
+        } else if (leftPaddle.y + paddleHeight > canvas.height) {
+          leftPaddle.y = canvas.height - paddleHeight;
+        }
+
+        if (rightPaddle.y < 0) {
+          rightPaddle.y = 0;
+        } else if (rightPaddle.y + paddleHeight > canvas.height) {
+          rightPaddle.y = canvas.height - paddleHeight;
+        }
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        drawPaddle(leftPaddle.x, leftPaddle.y);
+        drawPaddle(rightPaddle.x, rightPaddle.y);
+        drawBall();
+      }
+
+      function gameLoop() {
+        if (isPlaying) {
+          update();
+          draw();
+        }
+        animationFrameId = requestAnimationFrame(gameLoop);
+      }
+
+      startStopBtn.addEventListener("click", () => {
+        isPlaying = !isPlaying;
+        startStopBtn.textContent = isPlaying ? "Stop" : "Start";
+      });
+
+      speedSlider.addEventListener("input", (e) => {
+        const speed = parseInt(e.target.value);
+        ball.dx = ball.dx > 0 ? speed : -speed;
+        ball.dy = ball.dy > 0 ? speed : -speed;
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowUp") {
+          rightPaddle.dy = -7;
+        } else if (e.key === "ArrowDown") {
+          rightPaddle.dy = 7;
+        }
+
+        if (e.key === "w" || e.key === "W") {
+          leftPaddle.dy = -7;
+        } else if (e.key === "s" || e.key === "S") {
+          leftPaddle.dy = 7;
+        }
+      });
+
+      document.addEventListener("keyup", (e) => {
+        if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+          rightPaddle.dy = 0;
+        }
+
+        if (e.key === "w" || e.key === "W" || e.key === "s" || e.key === "S") {
+          leftPaddle.dy = 0;
+        }
+      });
+
+      gameLoop();
+    </script>
+  </body>
+</html>

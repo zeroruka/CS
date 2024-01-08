@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Snake Game</title>
+    <style>
+      #game-board {
+        width: 300px;
+        height: 300px;
+        border: 1px solid black;
+        position: relative;
+      }
+      .snake,
+      .food {
+        width: 10px;
+        height: 10px;
+        position: absolute;
+      }
+      .snake {
+        background-color: green;
+      }
+      .food {
+        background-color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="game-board"></div>
+    <script src="snake.js"></script>
+  </body>
+</html>
